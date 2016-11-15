@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+
+    consumer:
+        build: .
+
+        links:
+            - amqp
+            - mail
+
+        volumes:
+            - ".:/app"
+
+        environment:
+            CELERY_BROKER: amqp
+            SMTP_HOST: mail
+
+    amqp:
+        image: rabbitmq
+        ports:
+            - "5672:5672"
+
+    mail:
+        image: djfarrelly/maildev
+        ports:
+            - "80:80"
