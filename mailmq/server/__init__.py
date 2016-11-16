@@ -1,36 +1,31 @@
 import os
-import email
+import logging
 import smtplib
 
 from celery import Celery
 
 
-app = Celery(__name__, broker=os.environ['CELERY_BROKER'])
+logging.basicConfig(level=logging.INFO)
+
+LOGGER = logging.getLogger(__name__)
+app = Celery(broker=os.environ['CELERY_BROKER'])
 
 
-@app.task
-def sendmail(to=None,
-             cc=None,
-             bcc=None,
-             subject=None,
+@app.task(autoretry_for=(smtplib.SMTPException,))
+def sendmail(sender=None,
+             to=None,
              body=None):
     """
     Send email.
     """
 
-    message = email.message_from_string(body)
-    message['To'] = ', '.join(to or [])
-    message['From'] = os.environ.get('MAIL_FROM', 'no-reply@localhost')
+    assert isinstance(to, list)
+    assert to
 
-    if cc is not None:
-        message['Cc'] = ', '.join(cc)
-
-    if bcc is not None:
-        message['Bcc'] = ', '.join(bcc)
-
-    if subject is not None:
-        message['Subject'] = subject
+    sender = sender or os.environ['MAIL_FROM']
 
     with smtplib.SMTP(host=os.environ['SMTP_HOST'],
                       port=os.environ.get('SMTP_PORT', 25)) as server:
-        server.send_message(message)
+        LOGGER.info("Sending email from %s -> %s", sender, to)
+        server.sendmail(sender, to, body)
+        LOGGER.info("Done")
