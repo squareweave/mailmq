@@ -5,7 +5,7 @@ RUN set -xe && \
     true
 
 WORKDIR /app
-CMD celery -A mailmq.server worker --uid=1
+CMD celery -A mailmq.server worker --uid=1 --loglevel=INFO
 
 COPY requirements.txt /app/
 

@@ -1,13 +1,11 @@
 import os
-import logging
 import smtplib
 
 from celery import Celery
+from celery.utils.log import get_task_logger
 
 
-logging.basicConfig(level=logging.INFO)
-
-LOGGER = logging.getLogger(__name__)
+LOGGER = get_task_logger(__name__)
 app = Celery(broker=os.environ['CELERY_BROKER'])
 
 
@@ -19,13 +17,20 @@ def sendmail(sender=None,
     Send email.
     """
 
-    assert isinstance(to, list)
-    assert to
+    try:
+        assert isinstance(to, list)
+        assert to
 
-    sender = sender or os.environ['MAIL_FROM']
+        sender = sender or os.environ['MAIL_FROM']
 
-    with smtplib.SMTP(host=os.environ['SMTP_HOST'],
-                      port=os.environ.get('SMTP_PORT', 25)) as server:
-        LOGGER.info("Sending email from %s -> %s", sender, to)
-        server.sendmail(sender, to, body)
-        LOGGER.info("Done")
+        with smtplib.SMTP(host=os.environ['SMTP_HOST'],
+                        port=os.environ.get('SMTP_PORT', 25)) as server:
+            if 'SMTP_USER' in os.environ:
+                server.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS'])
+
+            LOGGER.info("Sending email from %s -> %s", sender, to)
+            server.sendmail(sender, to, body)
+            LOGGER.info("Done")
+    except:
+        LOGGER.exception("Failed to send email!")
+        raise

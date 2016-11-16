@@ -14,7 +14,10 @@ services:
 
         environment:
             CELERY_BROKER: amqp
+            MAIL_FROM: noreply@example.com
             SMTP_HOST: mail
+            SMTP_USER: badger
+            SMTP_PASS: naspw
 
     amqp:
         image: rabbitmq
@@ -23,5 +26,6 @@ services:
 
     mail:
         image: djfarrelly/maildev
+        command: bin/maildev --web 80 --smtp 25 --incoming-user badger --incoming-pass naspw
         ports:
             - "80:80"
