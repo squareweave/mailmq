@@ -4,9 +4,6 @@
 docker-compose up -d
 
 export CELERY_BROKER=localhost
+export PHPRC=$(dirname $0)/php.ini
 
-php -d 'sendmail_path="python -m mailmq.client -t"' \
-    -d allow_url_fopen=On \
-    -d detect_unicode=Off \
-    phpunit-5.6.2.phar \
-    tests
+phpunit tests

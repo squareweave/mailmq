@@ -44,11 +44,20 @@ Client
 
 Designed to have the same command line arguments as `sendmail`.
 
-With installing:
+From pip:
+
+```
+pip install mailmq
+```
+
+With source:
 
 ```
 python setup.py install
-CELERY_BROKER=amqp mailmq << EOF
+```
+
+```
+CELERY_BROKER=amqp mailmq -t << EOF
 From: badger@badger.com
 To: badger@badger.com
 Subject: badger
@@ -66,6 +75,12 @@ CELERY_BROKER=localhost python -m mailmq.client badger@example.com
 The following environment variables are supported:
 
 * `CELERY_BROKER` - AMQP broker (required)
+
+Add the following to your `php.ini` to use with PHP:
+
+```
+sendmail_path = "mailmq -t"
+```
 
 License
 -------
