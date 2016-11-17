@@ -67,11 +67,6 @@ The following environment variables are supported:
 
 * `CELERY_BROKER` - AMQP broker (required)
 
-ToDo
-----
-
-* Tests (incl tests of PHP's `mail()`)
-
 License
 -------
 
