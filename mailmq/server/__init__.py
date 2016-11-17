@@ -25,6 +25,13 @@ def sendmail(sender=None,
 
         with smtplib.SMTP(host=os.environ['SMTP_HOST'],
                         port=os.environ.get('SMTP_PORT', 25)) as server:
+
+            try:
+                server.starttls()
+            except smtplib.SMTPNotSupportedError:
+                LOGGER.warning("No TLS for %s!", os.environ['SMTP_HOST'])
+                pass
+
             if 'SMTP_USER' in os.environ:
                 server.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS'])
 
