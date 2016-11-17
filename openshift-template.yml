@@ -60,8 +60,8 @@ objects:
                    - name: SMTP_USER
                      value: ${SMTP_USER}
 
-                   - name: SMTP_PORT
-                     value: ${SMTP_PORT}
+                   - name: SMTP_PASS
+                     value: ${SMTP_PASS}
 
                    - name: MAIL_FROM
                      value: ${MAIL_FROM}
