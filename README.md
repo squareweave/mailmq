@@ -18,25 +18,58 @@ environment.
 Server
 ------
 
+Via Docker:
+
+```
+docker-compose up
+```
+
+Or directly:
+
 ```
 CELERY_BROKER=localhost SMTP_HOST=mail celery -A mailmq.server worker
 ```
 
+The following environment variables are supported:
+
+* `CELERY_BROKER` - AMQP broker (required)
+* `SMTP_HOST` - destination SMTP server host (required)
+* `SMTP_PORT` - destination SMTP server port
+* `SMTP_USER` - user for SMTP auth
+* `SMTP_PASS` - password for SMTP auth
+* `MAIL_FROM` - default sender (strongly recommended)
+
 Client
 ------
 
-Designed to have the same command line arguments as `mail`.
+Designed to have the same command line arguments as `sendmail`.
+
+With installing:
 
 ```
-CELERY_BROKER=localhost python -m mailmq.client badger@example.com << EOF
-badger
+python setup.py install
+CELERY_BROKER=amqp mailmq << EOF
+From: badger@badger.com
+To: badger@badger.com
+Subject: badger
+
+Badger!
 EOF
 ```
+
+Or without installing:
+
+```
+CELERY_BROKER=localhost python -m mailmq.client badger@example.com
+```
+
+The following environment variables are supported:
+
+* `CELERY_BROKER` - AMQP broker (required)
 
 ToDo
 ----
 
-* Authentication
 * Tests (incl tests of PHP's `mail()`)
 
 License
