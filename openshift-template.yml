@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Template
+metadata:
+    name: mailmq
+
+parameters:
+    - name: SMTP_HOST
+      required: true
+      description: SMTP relay host
+
+    - name: SMTP_PORT
+      description: SMTP relay port
+      value: '25'
+
+    - name: SMTP_USER
+      description: SMTP user
+
+    - name: SMTP_PASS
+      description: SMTP password
+
+    - name: MAIL_FROM
+      description: Default email sender
+
+objects:
+    - apiVersion: v1
+      kind: DeploymentConfig
+      metadata:
+        name: mailmq-worker
+
+      spec:
+        replicas: 1
+        selector:
+          name: mailmq-worker
+          deploymentconfig: mailmq-worker
+
+        strategy:
+          resources: {}
+
+        template:
+          metadata:
+            labels:
+              name: mailmq-worker
+              deploymentconfig: mailmq-worker
+
+          spec:
+            containers:
+             - image: docker.io/squareweave/mailmq
+               namespace: docker-upstream
+               name: mailmq
+               env:
+                   - name: CELERY_BROKER
+                     value: amqp
+
+                   - name: SMTP_HOST
+                     value: ${SMTP_HOST}
+
+                   - name: SMTP_PORT
+                     value: ${SMTP_PORT}
+
+                   - name: SMTP_USER
+                     value: ${SMTP_USER}
+
+                   - name: SMTP_PORT
+                     value: ${SMTP_PORT}
+
+                   - name: MAIL_FROM
+                     value: ${MAIL_FROM}
+
+        triggers:
+         - type: ImageChange
+           imageChangeParams:
+             automatic: true
+             containerNames:
+              - mailmq
+
+             from:
+               kind: ImageStreamTag
+               namespace: docker-upstream
+               name: 'mailmq:latest'
+
+         - type: ConfigChange
+
+    - apiVersion: v1
+      kind: DeploymentConfig
+      metadata:
+        name: amqp
+
+      spec:
+        replicas: 1
+        selector:
+          name: amqp
+          deploymentconfig: amqp
+
+        strategy:
+          resources: {}
+
+        template:
+          metadata:
+            labels:
+              name: amqp
+              deploymentconfig: amqp
+
+          spec:
+            containers:
+             - image: docker.io/rabbitmq
+               namespace: docker-upstream
+               name: rabbitmq
+               volumeMounts:
+                - mountPath: /var/lib/rabbitmq/mnesia
+                  name: queue
+
+            volumes:
+             - emptyDir: {}
+               name: queue
+
+        triggers:
+         - type: ImageChange
+           imageChangeParams:
+             automatic: true
+             containerNames:
+              - rabbitmq
+
+             from:
+               kind: ImageStreamTag
+               namespace: docker-upstream
+               name: 'rabbitmq:latest'
+
+         - type: ConfigChange
+
+    - kind: Service
+      apiVersion: v1
+
+      metadata:
+        name: amqp
+
+      spec:
+        ports:
+         - name: amqp
+           port: 5672
+           protocol: TCP
+           targetPort: 5672
+
+        selector:
+          name: amqp
+
+        sessionAffinity: None
+        type: ClusterIP
