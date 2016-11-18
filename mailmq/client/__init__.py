@@ -23,18 +23,23 @@ def main():
     args = parser.parse_args()
     body = sys.stdin.read()
 
+    message = email.message_from_string(body)
+    _, mail_from = email.utils.parseaddr(message.get('from'))
+
+    rcpt_to = args.to_addr
+
     if args.extract_recipients:
-        message = email.message_from_string(body)
-        to = args.to_addr + email.utils.getaddresses(
-            message.get_all('to', []) +
-            message.get_all('cc', []) +
-            message.get_all('resent-to', []) +
-            message.get_all('resent-cc', []))
-    else:
-        to = args.to_addr
+        rcpt_to += [
+            address
+            for _, address in email.utils.getaddresses(
+                message.get_all('to', []) +
+                message.get_all('cc', []) +
+                message.get_all('resent-to', []) +
+                message.get_all('resent-cc', []))
+        ]
 
-    assert to, "Need some recipients!"
+    assert rcpt_to, "Need some recipients!"
 
-    sendmail.delay(sender=args.sender,
-                   to=to,
+    sendmail.delay(sender=args.sender or mail_from,
+                   to=rcpt_to,
                    body=body)
