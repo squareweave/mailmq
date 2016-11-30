@@ -13,7 +13,7 @@ from ..server import sendmail
 def main():
     """Main entrypoint."""
     parser = argparse.ArgumentParser(description="Send an email via Celery/MQ.")
-    parser.add_argument('-r', dest='sender', type=str,
+    parser.add_argument('-r', '-f', dest='sender', type=str,
                         help="Set the envelope sender address.")
     parser.add_argument('-t', dest='extract_recipients', action='store_true',
                         help="Extract recipients.")
