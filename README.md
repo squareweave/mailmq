@@ -82,6 +82,17 @@ Add the following to your `php.ini` to use with PHP:
 sendmail_path = "mailmq -t"
 ```
 
+Tests
+-----
+
+# Install PHPUnit locally, with an appropriate version of PHP also installed 
+  and available locally
+# Have python3 available locally (using virtualenv or similar)
+# Install celery locally with `pip install -r requirements.txt`
+# `./tests/run.sh` - this will start up the required docker containers, and
+  configure PHP to use mailmq for sendmail, then run the phpunit tests.
+
+
 License
 -------
 
