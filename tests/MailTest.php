@@ -9,4 +9,13 @@ class MailTest extends TestCase
              "Snake",
              "Mushroom");
     }
+
+    public function testSendMailAdditionalOption()
+    {
+        mail("badger@example.com",
+             "Snake",
+             "Mushroom",
+             null,
+             "-fbigbadger@example.com");
+    }
 }
